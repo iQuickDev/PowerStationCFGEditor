@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style/bootstrap.css">
     <link rel="stylesheet" href="style/style.css">
-    <title>Vodafone Power Station Editor</title>
+    <title>Vodafone Power Station WI-FI Editor</title>
 </head>
 
 <body class="bg-dark">
@@ -20,40 +20,108 @@
         </div>
         <div id="main" class="row m-auto fs-4">
             <div>
-                <input type="checkbox" id="toggle-wifi" value="WI-FI">
+                <input type="checkbox" id="toggle-wifi">
                 <label for="toggle-wifi" class="text-light">
                     Wi-Fi
                 </label>
             </div>
             <div>
-                <input type="checkbox" id="toggle-wps" value="WI-FI">
+                <input type="checkbox" id="toggle-wps">
                 <label for="toggle-wps" class="text-light">
                     Enable WPS
                 </label>
             </div>
             <div>
-                <input type="checkbox" id="split-ssid" value="WI-FI">
-                <label for="splid-ssid" class="text-light">
+                <input type="checkbox" id="split-ssid">
+                <label for="split-ssid" class="text-light">
                     Split SSID
+                </label>
+            </div>
+            <div>
+                <input type="checkbox" id="vf-network">
+                <label for="vf-network" class="text-light">
+                    Vodafone Wi-Fi Community
                 </label>
             </div>
         </div>
         <br>
         <div id="setup" class="row">
-            <div id="general" class="col-6">
+            <div id="general" class="col-sm-6">
+                <br>
                 <div class="alert alert-primary">
-                    <h3 class="text-center">Default Wi-Fi</h3>
+                    <h3 class="text-center">Main Wi-Fi</h3>
+                </div>
+                <div class="form-group alert fs-4">
+                    <h2 class="text-center">2.4 GHz Band (Default)</h2>
+                    <label for="ssid-main">SSID</label>
+                    <input type="text" class="form-control" id="ssid-main" placeholder="Enter SSID">
+                    <input type="checkbox" id="broadcast-ssid-main">
+                    <label for="broadcast-ssid-main">Broadcast SSID</label>
+                    <br>
+                    <label for="protection-main">Protection</label>
+                    <select class="form-control" id="protection-main">
+                        <option>off</option>
+                        <option>WEP</option>
+                        <option>WPA2</option>
+                        <option>WPA + WPA2</option>
+                    </select>
+                    <label for="password-main">Password</label>
+                    <input type="text" class="form-control" id="password-main" placeholder="Enter Password">
+                </div>
+                <div class="form-group alert fs-4">
+                    <h2 class="text-center">5 GHz Band</h2>
+                    <label for="ssid-5g">SSID</label>
+                    <input type="text" class="form-control" id="ssid-5g" placeholder="Enter SSID">
+                    <input type="checkbox" id="broadcast-ssid-5g">
+                    <label for="broadcast-ssid-5g">Broadcast SSID</label>
+                    <br>
+                    <label for="protection-5g">Protection</label>
+                    <select class="form-control" id="protection-5g">
+                        <option>off</option>
+                        <option>WEP</option>
+                        <option>WPA2</option>
+                        <option>WPA + WPA2</option>
+                    </select>
+                    <label for="password-5g">Password</label>
+                    <input type="text" class="form-control" id="password-5g" placeholder="Enter Password">
                 </div>
             </div>
-            <div id="guest" class="col-6">
+            <div id="guest" class="col-sm-6">
+                <br>
                 <div class="alert alert-secondary">
                     <h3 class="text-center">Guest Wi-Fi</h3>
+                </div>
+                <div class="form-group alert fs-4">
+                    <input type="checkbox" id="guest-enabled">
+                    <label for="guest-enabled">Enable Guest Wi-Fi</label>
+                    <br>
+                    <label for="ssid-main">SSID</label>
+                    <input type="text" class="form-control" id="ssid-main" placeholder="Enter SSID">
+                    <input type="checkbox" id="broadcast-ssid-main">
+                    <label for="broadcast-ssid-main">Broadcast SSID</label>
+                    <br>
+                    <label for="frequency-guest">Frequency</label>
+                    <select class="form-control" id="protection-main">
+                        <option>2.4 GHz</option>
+                        <option>5 GHz</option>
+                        <option>2.4 GHz/5 GHz</option>
+                    </select>
+                    <label for="protection-main">Protection</label>
+                    <select class="form-control" id="protection-main">
+                        <option>off</option>
+                        <option>WEP</option>
+                        <option>WPA2</option>
+                        <option>WPA + WPA2</option>
+                    </select>
+                    <label for="password-main">Password</label>
+                    <input type="text" class="form-control" id="password-main" placeholder="Enter Password">
                 </div>
             </div>
         </div>
         <br>
-        <div id="output-container" class="output text-center">
-            <p>Copy this text and paste it in the browser console after logging on router administration page</p>
+        <div id="output-container" class="output text-center mb-5">
+            <p>Copy this text and paste it in the browser console after logging on the <a href="http://192.168.1.1"
+                    target="_blank">router administration page</a></p>
             <textarea id="output" class="form-control bg-secondary" rows="10" readonly></textarea>
             <button id="copy" onclick="copyToClipboard()" class="btn btn-primary w-50 fs-4 fw-bold mt-3">Copy</button>
         </div>
@@ -61,220 +129,249 @@
 
     <script>
 
-        for (const input of document.querySelectorAll('input'))
-        {
-            input.addEventListener('change', function() {
+        for (const input of document.querySelectorAll('input')) {
+            input.addEventListener('keyup', function () {
                 generateConfig()
             })
         }
 
-        let wifiOnOff_all = false
-        let enable_wifi_and_wps = false
-        let buttonVFNetwork
-        let wifi_network_onoff = false
-        let split_ssid = false
-        let wifi_network_onoff_5g = false
-        let select_frenquency = false
-        let select_5g_frenquency
-        let wifi_network_onoff_guest = false
-        let wifi_ssid = false
-        let wifi_broadcast_ssid = false
-        let wifi_password = false
-        let wifi_protection = false
-        let wifi_ssid_5g = false
-        let wifi_broadcast_ssid_5g = false
-        let wifi_password_5g = false
-        let wifi_protection_5g = false
-        let wifi_ssid_guest = false
-        let wifi_broadcast_ssid_guest = false
-        let wifi_frenquency_guest = false
-        let wifi_protection_guest = false
-        let wifi_password_guest = false
-
-        let configuration = [
-            {
-                "nameObj": {
-                    "name": "wifiGeneralNetworkAllOnOff",
-                    "id": "wifiOnOff_all"
-                },
-                "value": wifiOnOff_all,
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralEnableWiFiAndWPS",
-                    "id": "enable_wifi_and_wps"
-                },
-                "value": enable_wifi_and_wps,
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralButtonVFNetwork",
-                    "id": "buttonVFNetwork"
-                },
-                "value": buttonVFNetwork,
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralSplitSSID",
-                    "id": "split_ssid"
-                },
-                "value": split_ssid,
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralNetworkOnOff",
-                    "id": "wifi_network_onoff"
-                },
-                "value": wifi_network_onoff,
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralNetworkOnOff_5G",
-                    "id": "wifi_network_onoff_5g"
-                },
-                "value": wifi_network_onoff_5g
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralFrenquency",
-                    "id": "select_frenquency"
-                },
-                "value": select_frenquency
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralFrenquency_5g",
-                    "id": "select_5g_frenquency"
-                },
-                "value": select_5g_frenquency
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralNetworkOnOffGuest",
-                    "id": "wifi_network_onoff_guest"
-                },
-                "value": wifi_network_onoff_guest
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralSSID",
-                    "id": "wifi_ssid"
-                },
-                "value": wifi_ssid
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralBroadcastSSID",
-                    "id": "wifi_broadcast_ssid"
-                },
-                "value": wifi_broadcast_ssid
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralPassword",
-                    "id": "wifi_password"
-                },
-                "value": wifi_password
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralProtection",
-                    "id": "wifi_protection"
-                },
-                "value": wifi_protection
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralSSID_5G",
-                    "id": "wifi_ssid_5g"
-                },
-                "value": wifi_ssid_5g
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralBroadcastSSID_5G",
-                    "id": "wifi_broadcast_ssid_5g"
-                },
-                "value": wifi_broadcast_ssid_5g
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralPassword_5G",
-                    "id": "wifi_password_5g"
-                },
-                "value": wifi_password_5g
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralProtection_5G",
-                    "id": "wifi_protection_5g"
-                },
-                "value": wifi_protection_5g
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralSSIDGuest",
-                    "id": "wifi_ssid_guest"
-                },
-                "value": wifi_ssid_guest
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralBroadcastSSIDGuest",
-                    "id": "wifi_broadcast_ssid_guest"
-                },
-                "value": wifi_broadcast_ssid_guest
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralFrenquencyGuest",
-                    "id": "wifi_Frenquency_guest"
-                },
-                "value": wifi_frenquency_guest
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralProtectionGuest",
-                    "id": "wifi_protection_guest"
-                },
-                "value": wifi_protection_guest
-            },
-            {
-                "nameObj": {
-                    "name": "wifiGeneralPasswordGuest",
-                    "id": "wifi_password_guest"
-                },
-                "value": wifi_password_guest
-            }
-        ]
-
-        function generateConfig()
-        {
-            document.querySelector('#output').value = `dataBatchSend_sjcl(${JSON.stringify(configuration)}, function(){}, "wifi_general")`
+        for (const select of document.querySelectorAll('select')) {
+            select.addEventListener('change', function () {
+                generateConfig()
+            })
         }
 
-        function copyToClipboard()
-        {
+        let wifiOnOff_all
+        let enable_wifi_and_wps
+        let buttonVFNetwork
+        let wifi_network_onoff = true
+        let split_ssid
+        let wifi_network_onoff_5g = true
+        let select_frenquency
+        let select_5g_frenquency
+        let wifi_network_onoff_guest
+        let wifi_ssid
+        let wifi_broadcast_ssid
+        let wifi_password
+        let wifi_protection
+        let wifi_ssid_5g
+        let wifi_broadcast_ssid_5g
+        let wifi_password_5g
+        let wifi_protection_5g
+        let wifi_ssid_guest
+        let wifi_broadcast_ssid_guest
+        let wifi_frenquency_guest
+        let wifi_protection_guest
+        let wifi_password_guest
+
+        function generateConfig() {
+            /* General Configuration */
+            wifiOnOff_all = document.querySelector('#toggle-wifi').checked
+            enable_wifi_and_wps = document.querySelector('#toggle-wps').checked
+            buttonVFNetwork = document.querySelector('#vf-network').checked
+            split_ssid = document.querySelector('#split-ssid').checked
+
+            /* 2.4 GHz Configuration */
+            wifi_ssid = document.querySelector('#ssid-main').value
+            wifi_broadcast_ssid = document.querySelector('#broadcast-ssid-main').checked
+            wifi_protection = document.querySelector('#protection-main').value
+            wifi_password = document.querySelector('#password-main').value
+
+            /* 5 GHz Configuration */
+            wifi_ssid_5g = document.querySelector('#ssid-5g').value
+            wifi_broadcast_ssid_5g = document.querySelector('#broadcast-ssid-5g').checked
+            wifi_protection_5g = document.querySelector('#protection-5g').value
+            wifi_password_5g = document.querySelector('#password-5g').value
+
+            /* Guest Configuration */
+            wifi_network_onoff_guest = document.querySelector('#guest-enabled').checked
+            wifi_ssid_guest = document.querySelector('#ssid-main').value
+            wifi_broadcast_ssid_guest = document.querySelector('#broadcast-ssid-main').checked
+            wifi_frenquency_guest = document.querySelector('#protection-main').value
+            wifi_protection_guest = document.querySelector('#protection-main').value
+            wifi_password_guest = document.querySelector('#password-main').value
+
+            let configuration = [
+                {
+                    nameObj: {
+                        name: "wifiGeneralNetworkAllOnOff",
+                        id: "wifiOnOff_all"
+                    },
+                    value: wifiOnOff_all,
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralEnableWiFiAndWPS",
+                        id: "enable_wifi_and_wps"
+                    },
+                    value: enable_wifi_and_wps,
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralButtonVFNetwork",
+                        id: "buttonVFNetwork"
+                    },
+                    value: buttonVFNetwork,
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralSplitSSID",
+                        id: "split_ssid"
+                    },
+                    value: split_ssid,
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralNetworkOnOff",
+                        id: "wifi_network_onoff"
+                    },
+                    value: wifi_network_onoff,
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralNetworkOnOff_5G",
+                        id: "wifi_network_onoff_5g"
+                    },
+                    value: wifi_network_onoff_5g
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralFrenquency",
+                        id: "select_frenquency"
+                    },
+                    value: select_frenquency
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralFrenquency_5g",
+                        id: "select_5g_frenquency"
+                    },
+                    value: select_5g_frenquency
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralNetworkOnOffGuest",
+                        id: "wifi_network_onoff_guest"
+                    },
+                    value: wifi_network_onoff_guest
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralSSID",
+                        id: "wifi_ssid"
+                    },
+                    value: wifi_ssid
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralBroadcastSSID",
+                        id: "wifi_broadcast_ssid"
+                    },
+                    value: wifi_broadcast_ssid
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralPassword",
+                        id: "wifi_password"
+                    },
+                    value: wifi_password
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralProtection",
+                        id: "wifi_protection"
+                    },
+                    value: wifi_protection
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralSSID_5G",
+                        id: "wifi_ssid_5g"
+                    },
+                    value: wifi_ssid_5g
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralBroadcastSSID_5G",
+                        id: "wifi_broadcast_ssid_5g"
+                    },
+                    value: wifi_broadcast_ssid_5g
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralPassword_5G",
+                        id: "wifi_password_5g"
+                    },
+                    value: wifi_password_5g
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralProtection_5G",
+                        id: "wifi_protection_5g"
+                    },
+                    value: wifi_protection_5g
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralSSIDGuest",
+                        id: "wifi_ssid_guest"
+                    },
+                    value: wifi_ssid_guest
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralBroadcastSSIDGuest",
+                        id: "wifi_broadcast_ssid_guest"
+                    },
+                    value: wifi_broadcast_ssid_guest
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralFrenquencyGuest",
+                        id: "wifi_Frenquency_guest"
+                    },
+                    value: wifi_frenquency_guest
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralProtectionGuest",
+                        id: "wifi_protection_guest"
+                    },
+                    value: wifi_protection_guest
+                },
+                {
+                    nameObj: {
+                        name: "wifiGeneralPasswordGuest",
+                        id: "wifi_password_guest"
+                    },
+                    value: wifi_password_guest
+                }
+            ]
+
+            document.querySelector('#output').value = `dataBatchSend_sjcl(${JSON.stringify(configuration)}, function(){}, "wifi_general");alert("Configuration altered successfully!")`
+
+            return configuration
+        }
+
+        function copyToClipboard() {
             try {
                 navigator.clipboard.writeText(document.querySelector('#output').value)
                 document.querySelector('#copy').classList.remove('btn-primary')
                 document.querySelector('#copy').classList.add('btn-success')
                 document.querySelector('#copy').textContent = 'Copied!'
-            } catch (e)
-            {
+            } catch (e) {
                 console.error(e)
                 document.querySelector('#copy').classList.remove('btn-primary')
                 document.querySelector('#copy').classList.add('btn-danger')
                 document.querySelector('#copy').textContent = 'Could not copy!'
             }
 
-            setTimeout(() =>
-                {
-                    document.querySelector('#copy').classList.remove('btn-danger')
-                    document.querySelector('#copy').classList.remove('btn-success')
-                    document.querySelector('#copy').classList.add('btn-primary')
-                    document.querySelector('#copy').textContent = 'Copy'
-                }, 2000)
+            setTimeout(() => {
+                document.querySelector('#copy').classList.remove('btn-danger')
+                document.querySelector('#copy').classList.remove('btn-success')
+                document.querySelector('#copy').classList.add('btn-primary')
+                document.querySelector('#copy').textContent = 'Copy'
+            }, 2000)
         }
     </script>
 </body>
